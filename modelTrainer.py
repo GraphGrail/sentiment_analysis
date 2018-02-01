@@ -26,20 +26,11 @@ class ModelTrainer:
         minimumLoss = None
         print("Number of steps before testing step: " +  str(self.__numberOfStepsBeforeTesting))
         while self.__continueTraining == True:
-            i = 0
             if showModelOutputDuringTrainingSteps == False:
                 with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-                    while i < self.__numberOfStepsBeforeTesting:
-                        if self.__continueTraining == False:
-                            break
-                        self.__model.fit_generator(self.__trainGenerator, steps_per_epoch=1, epochs=1, use_multiprocessing=True)
-                        i += 1
+                    self.__model.fit_generator(self.__trainGenerator, steps_per_epoch=self.__numberOfStepsBeforeTesting, epochs=1, use_multiprocessing=True)
             else:
-                while i < self.__numberOfStepsBeforeTesting:
-                    if self.__continueTraining == False:
-                        break
-                    self.__model.fit_generator(self.__trainGenerator, steps_per_epoch=1, epochs=1, use_multiprocessing=True)
-                    i += 1
+                self.__model.fit_generator(self.__trainGenerator, steps_per_epoch=self.__numberOfStepsBeforeTesting, epochs=1, use_multiprocessing=True)
             self.__totalNumberOfStepsMade += self.__numberOfStepsBeforeTesting
             print("Number of steps made: " + str(self.__totalNumberOfStepsMade))
             if self.__trainFiniteGeneratorForTestModel != None: # test model. Can it predict correctly at least on train data
