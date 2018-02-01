@@ -6,6 +6,8 @@ import numpy as np
 import gensim
 import os
 import json
+import enchant
+import pymorphy2
 
 # interface for word convertion (word -> vector) class
 class WordToVecConverter:
@@ -93,4 +95,56 @@ class WordToVecConverterProximityBased(WordToVecConverter):
     def getDtype():
         return np.float32
     __model = None
+    
+    
+class WordToVecConverterKeyedVectorsBasedUsingSupportModels(WordToVecConverter):
+    def convert(self, word):
+        try:
+            res = self.__model[word]
+            return res
+        except:
+            splitOfWordOnActualWordAndSentencePart = word.split("_")
+            actualWord = splitOfWordOnActualWordAndSentencePart[0]
+            for model in self.__models:
+                similarWords = self._findSimilarWords(actualWord, model)
+                for similarWord in similarWords:
+                    try:
+                        res = self.__model[similarWord]
+                        return res
+                    except:
+                        pass
+            if len(similarWords) == 0:
+                
+            alternatives = self._getAlternativeSpellingVariants(actualWord)
+            
+            for alternativeWord in alternatives:
+                
+    def setModel(self, models):
+        self.__models = models
+    def setSupportingModels(self, models):
+        self.__supportingModels = models
+    def _getAlternativeSpellingVariants(self, word):
+        d = enchant.Dict("ru_RU")
+        return d.suggest(word)
+    def _findSimilarWords(self, word, model):
+        res = []
+        mainSentenceParts = ['NOUN', 'ADJF', 'ADJS', 'COMP', 'VERB', 'INFN', 'PRTF', 'PRTS', 'GRND', 'ADVB']
+        for sentencePart in mainSentenceParts:
+            try:
+                similarWords = [w[0] for w in model.similar_by_word(word + sentencePart, topn=3)]
+                res = res + similarWords
+            except:
+                pass
+        return res
+    def searchAnyVectorForWords(self, words):
+        for model in self.__models:
+                similarWords = self._findSimilarWords(actualWord, model)
+                for similarWord in similarWords:
+                    try:
+                        res = self.__model[similarWord]
+                        return res
+                    except:
+                        pass
+    __model = None
+    __supportingModels = None
 
