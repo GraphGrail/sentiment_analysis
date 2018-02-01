@@ -25,12 +25,25 @@ class TextPreprocessor:
         if pd.isnull(text):
             return []
         wordList = self.splitStringInList(text)
+        if self.testMode == True:
+            print("After splitting:")
+            print(wordList)
         namedEntitiesSet = self.getSetOfEntitiesInList(wordList)
         self.removeSpecificWordsFromList(wordList, namedEntitiesSet)
         self.removeNotInformativeWordsFromList(wordList)
-        self.normalizeWordsInList(wordList)
         if self.addPartOfSpeechTagToWords_ == True:
-            self.addPartOfSpeechTagToWordsInList(wordList)
+            speechParts = self.getSpeechPartsOfWordsInList(wordList)
+            self.normalizeWordsInList(wordList)
+            i = 0
+            while i < len(wordList):
+                if speechParts[i] != "":
+                    wordList[i] = wordList[i] + "_" + speechParts[i]
+                i += 1
+        else:
+            self.normalizeWordsInList(wordList)
+        if self.testMode == True:
+            print("After all changes:")
+            print(wordList)
         return wordList
     def convertListOfDocumentsTo2dListOfWords(self, documentList):
         i = 0
@@ -52,16 +65,18 @@ class TextPreprocessor:
         while i < listSize:
             l[i] = self.morph_.parse(l[i].lower())[0].normal_form
             i += 1
-    def addPartOfSpeechTagToWordsInList(self, l):
+    def getSpeechPartsOfWordsInList(self, l):
         i = 0
         listSize = len(l)
+        res = [""] * listSize
         while i < listSize:
-            speechPart = self.morph_.parse(l[i])[0].tag.POS
+            speechPart = self.morph_.parse(l[i].lower())[0].tag.POS
             if speechPart is None:
                 i += 1
                 continue
-            l[i] = l[i] + "_" + self.morph_.parse(l[i])[0].tag.POS
+            res[i] = str(speechPart)
             i += 1
+        return res
     # get list of words from text using regular expressions
     def splitStringInList(self, text):
         prog = re.compile(r'[А-Яа-яA-Za-z-]{1,}')
@@ -128,4 +143,6 @@ class TextPreprocessor:
     stoplist_ = None
     addPartOfSpeechTagToWords_ = None
     morph_ = None
+    
+    testMode = False
 
