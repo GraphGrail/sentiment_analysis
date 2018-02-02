@@ -32,7 +32,7 @@ class TextPreprocessor:
         self.removeSpecificWordsFromList(wordList, namedEntitiesSet)
         self.removeNotInformativeWordsFromList(wordList)
         if self.addPartOfSpeechTagToWords_ == True:
-            speechParts = self.getSpeechPartsOfWordsInList(wordList)
+            speechParts = self.speechPartsTagsToUniversalTags(self.getSpeechPartsOfWordsInList(wordList))
             self.normalizeWordsInList(wordList)
             i = 0
             while i < len(wordList):
@@ -77,9 +77,33 @@ class TextPreprocessor:
             res[i] = str(speechPart)
             i += 1
         return res
+    def speechPartsTagsToUniversalTags(self, tagList):
+        res = [""] * len(tagList)
+        i = 0
+        while i < len(tagList):
+            if tagList[i] in ["ADJF", "ADJS"]:
+                res[i] = "ADJ"
+                i += 1
+                continue
+            if tagList[i] in ["COMP", "ADVB"]:
+                res[i] = "ADV"
+                i += 1
+                continue
+            if tagList[i] in ["INFN", 'PRTF', 'PRTS', 'GRND']:
+                res[i] = "VERB"
+                i += 1
+                continue
+            if tagList[i] in ["NPRO"]:
+                res[i] = "NOUN"
+                i += 1
+                continue
+            res[i] = tagList[i]
+            i += 1
+        return res
     # get list of words from text using regular expressions
     def splitStringInList(self, text):
-        prog = re.compile(r'[А-Яа-яA-Za-z-]{1,}')
+        #prog = re.compile(r'[А-Яа-яA-Za-z-]{1,}')
+        prog = re.compile(r'[А-Яа-я]{1,}-{0,1}[А-Яа-я]{1,}|[A-Za-z]{1,}-{0,1}[A-Za-z]{1,}')
         wordsIterator = prog.finditer(text)
         resultList = []
         for word in wordsIterator:

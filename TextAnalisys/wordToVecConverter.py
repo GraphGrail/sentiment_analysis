@@ -97,7 +97,7 @@ class WordToVecConverterProximityBased(WordToVecConverter):
     __model = None
     
     
-class WordToVecConverterKeyedVectorsBasedUsingSupportModels(WordToVecConverter):
+'''class WordToVecConverterKeyedVectorsBasedUsingSupportModels(WordToVecConverter):
     def convert(self, word):
         try:
             res = self.__model[word]
@@ -146,5 +146,5 @@ class WordToVecConverterKeyedVectorsBasedUsingSupportModels(WordToVecConverter):
                     except:
                         pass
     __model = None
-    __supportingModels = None
+    __supportingModels = None'''
 
